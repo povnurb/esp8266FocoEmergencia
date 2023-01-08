@@ -4,6 +4,7 @@
 //ponerle un DNS
 #include <Arduino.h>
 #include <DNSServer.h>
+#include <ESP8266mDNS.h>
 #include <ESP8266WiFi.h>
 #include <FS.h>  //ESP-FTP-Server-Lib by Peter Buchegger
 #include <ESPAsyncWebServer.h>  //version 3.0.0 ESPAsyncWebServer-esphome by ESPHome Team
@@ -18,7 +19,7 @@ void ENCENDER(AsyncWebServerRequest *request);
 void APAGAR(AsyncWebServerRequest *request);
 String header;
 String SSID="", PASS="";
-const String lugar = "sala";
+const String lugar = "sala"; //cambiar nombre
 bool wifiIsConnected=false;
 bool indicadorLed;
 long tiempoDeConexion;
@@ -38,7 +39,7 @@ class myHandler : public AsyncWebHandler { //myHandler hereda todo de AsyncWebHa
     }
 };
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   SPIFFS.begin();
   Serial.println();
   pinMode(RELAY, OUTPUT);
@@ -74,6 +75,14 @@ void initWiFiAP(){
     Serial.println(".");
     delay(100);  
   }
+  //-----------------------------------------
+  if (MDNS.begin(lugar.c_str())){
+      MDNS.addService("http", "tcp", 80);
+      Serial.print("Direccion DNS: http://" );
+      Serial.print(lugar);
+      Serial.println(".com");
+  }
+  //-----------------------------------------
   Serial.print("Direccion IP AP: ");
   Serial.println(WiFi.softAPIP());
   initServer();
